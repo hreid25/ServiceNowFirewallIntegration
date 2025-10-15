@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <active>true</active>
+        <api_name>x_835786_firewall.FirewallIntegrationFacade</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description/>
+        <mobile_callable>false</mobile_callable>
+        <name>FirewallIntegrationFacade</name>
+        <sandbox_callable>false</sandbox_callable>
+        <script><![CDATA[var IFirewallAdapter = Class.create();
+IFirewallAdapter.prototype = {
+    initialize: function() {
+        this.adapter = new PanoramaAdapter();
+    },
+
+    runImport: function(schemaKey) {
+        var result = this.adapter.importData(schemaKey);
+        if (!result.success) {
+            gs.error("Import failed for " + schemaKey + ": " + result.message);
+        }
+        return result;
+    },
+
+    type: "IFirewallAdapter"
+};
+]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2025-09-28 14:51:44</sys_created_on>
+        <sys_id>9f497d8583d472100caa54d6feaad348</sys_id>
+        <sys_mod_count>7</sys_mod_count>
+        <sys_name>FirewallIntegrationFacade</sys_name>
+        <sys_package display_value="Firewall Interface Management Spoke" source="x_835786_firewall">3be3b9cd831472100caa54d6feaad3d5</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_scope display_value="Firewall Interface Management Spoke">3be3b9cd831472100caa54d6feaad3d5</sys_scope>
+        <sys_update_name>sys_script_include_9f497d8583d472100caa54d6feaad348</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2025-10-01 19:52:32</sys_updated_on>
+    </sys_script_include>
+</record_update>

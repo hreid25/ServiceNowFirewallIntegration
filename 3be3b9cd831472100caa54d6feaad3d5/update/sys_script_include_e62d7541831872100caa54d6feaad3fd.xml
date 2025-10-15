@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <active>true</active>
+        <api_name>x_835786_firewall.PanoramaAdapter</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description/>
+        <mobile_callable>false</mobile_callable>
+        <name>PanoramaAdapter</name>
+        <sandbox_callable>false</sandbox_callable>
+        <script><![CDATA[var PanoramaAdapter = Class.create();
+PanoramaAdapter.prototype = {
+    initialize: function(restMessageName) {
+        this.utils = new panoramaIntegrationUtils(); // reuse existing logic
+        this.restMessageName = restMessageName || "PanoramaFirewallREST";
+    },
+    /**
+     * Uses schema to make request based on predefined HTTP method; builds response body and then returns JSON
+     * params:
+     * @sysRestMessage (string) -- REST Message record name
+     * @httpMethod (string) -- HTTP Method record name
+     * @queryParams (object, optional) -- query params for endpoint defined in schema
+     */
+    fetchObjects: function(httpMethod, queryParams) {
+        var r = new sn_ws.RESTMessageV2(this.restMessageName, httpMethod);
+        //apply query params if provided
+        if (queryParams && typeof queryParams === "object") {
+            for (var key in queryParams) {
+                if (queryParams.hasOwnProperty(key)) {
+                    r.setQueryParameter(key, queryParams[key]);
+                }
+            }
+        }
+
+        try {
+            var response = r.execute();
+            var status = response.getStatusCode();
+            var body = response.getBody();
+
+            if (status !== 200 && status !== 201) {
+                var err = "REST call failed for endpoint: " + httpMethod + " Status: " + status + " | Body: " + body;
+                return {
+					success: false,
+					error: err
+				};
+            }
+
+            return {
+                success: true,
+                payload: JSON.parse(body)
+            };
+
+        } catch (ex) {
+            return {
+                success: true,
+                error: "Exception in fetch: " + ex.message
+            };
+        }
+
+    },
+
+	editObject() {},
+	pushObject() {},
+
+    /**
+     * The below function uses the schema map to determine which keys and values we extract from the JSON received from the REST request. To add additional values, add them to the schema "map" property at the beginning of this script include as well as the corresponding table columns to the relevant staging table, import table and transform map.
+     *
+     * Examine your endpoints JSON response as additional handling may be required if the structure of the data is not flat. For example, the normalizeValue function serves to stringify multiple values nested inside the 'default.port.member' and 'list.member' from Panorama application profiles and url categories, respectively.
+     *  **/
+    _parseResponse: function(payload, map) {
+        var raw = (payload.result && payload.result.entry) ? payload.result.entry : [];
+        var records = [];
+        for (var i = 0; i < raw.length; i++) {
+            var item = {};
+            for (var targetKey in map) {
+                if (!map.hasOwnProperty(targetKey)) continue;
+                var path = map[targetKey]; // e.g., "default.port.member"
+                var rawValue = this._resolvePath(raw[i], path);
+                item[targetKey] = this._normalizeValue(rawValue);
+            }
+            records.push(item);
+        }
+        return {
+            records: records
+        };
+    },
+
+	_resolvePath: function(obj, path) {
+        if (!obj || !path) return null;
+
+
+        var parts = path.split(".");
+        var current = obj;
+
+
+        for (var j = 0; j < parts.length; j++) {
+            if (current == null) return null;
+            current = current[parts[j]];
+        }
+        return current;
+    },
+
+    importData: function(schemaKey) {
+        try {
+            this.utils.runImportUtil(schemaKey);
+            return {
+                success: true,
+                message: "Import completed for " + schemaKey
+            };
+        } catch (ex) {
+            return {
+                success: false,
+                message: "Error in import for " + schemaKey + ": " + ex.message
+            };
+        }
+    },
+
+	getCommitJob: function() {
+
+	},
+
+
+
+    type: "PanoramaAdapter"
+};]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2025-09-28 14:58:23</sys_created_on>
+        <sys_id>e62d7541831872100caa54d6feaad3fd</sys_id>
+        <sys_mod_count>16</sys_mod_count>
+        <sys_name>PanoramaAdapter</sys_name>
+        <sys_package display_value="Firewall Interface Management Spoke" source="x_835786_firewall">3be3b9cd831472100caa54d6feaad3d5</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_scope display_value="Firewall Interface Management Spoke">3be3b9cd831472100caa54d6feaad3d5</sys_scope>
+        <sys_update_name>sys_script_include_e62d7541831872100caa54d6feaad3fd</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2025-10-15 13:58:58</sys_updated_on>
+    </sys_script_include>
+</record_update>

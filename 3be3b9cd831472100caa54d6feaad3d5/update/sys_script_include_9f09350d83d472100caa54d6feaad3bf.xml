@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <active>true</active>
+        <api_name>x_835786_firewall.panoramaIntegrationUtils</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description/>
+        <mobile_callable>false</mobile_callable>
+        <name>panoramaIntegrationUtils</name>
+        <sandbox_callable>false</sandbox_callable>
+        <script><![CDATA[var panoramaIntegrationUtils = Class.create();
+panoramaIntegrationUtils.prototype = {
+    initialize: function(correlationId) {
+        this.correlationId = correlationId || gs.generateGUID(); //generate if no unique id passed
+        /** NEW schemas MUST include the following properties:
+         * @httpMethod type:str
+         * @table type:str
+         * @requiresDeviceGroup type:boolean
+         * @key: type:str; unique identifier
+         * @dedupe: type:bool, optional; deduplicate entries - only necessary where multiple entries exist per device group.
+         * @map type:obj
+         *  */
+        this.schemas = {
+            application_data: {
+                httpMethod: "retrievePanoramaApplications",
+                table: "x_kpmg7_panorama_f_application_profile_import",
+                requiresDeviceGroup: false,
+                key: "u_name",
+                dedupe: false,
+                map: {
+                    u_name: "@name",
+                    u_port: "default.port.member",
+                    u_subcategory: "subcategory",
+                    category: "category"
+                },
+            },
+            url_categories: {
+                httpMethod: "retrieveUrlCategories",
+                table: "x_kpmg7_panorama_f_url_categories_import",
+                requiresDeviceGroup: true,
+                key: "u_name",
+                dedupe: true,
+                map: {
+                    u_name: "@name",
+                    u_type: "type",
+                    u_description: "description",
+                },
+            }
+        };
+        this.assignmentGroupSysId = "1d90ce486f9c358035c0a881be3ee4f4";
+        this.restMessageName = "panoramaObjectRetrieval";
+    },
+
+
+    /** runImportUtil runs all scheduled jobs
+     *
+     * params:
+     * @schemaKey, type:obj; name of schema in this.schemas
+     *
+     */
+    runImportUtil: function(schemaKey) {
+        payloads = [];
+        var adapter = new PanoramaAdapter(this.restMessageName);
+
+        var schema = this.schemas[schemaKey];
+        if (!schema) {
+            var err = "Schema not defined for key: " + schemaKey;
+            this.createIncident(this.assignmentGroupSysId, err);
+            return;
+        }
+
+        gs.info("Panorama Scheduled Job: " + this.correlationId + " Running Schema: " + schemaKey);
+
+        if (schema.requiresDeviceGroup) {
+            gs.info("Panorama Scheduled Job: " + this.correlationId + " Schema requires device group, collecting Device Group Names.");
+            var deviceGroupGr = new GlideRecord("cmdb_ci_firewall_device_group_panorama");
+            deviceGroupGr.query();
+            var deviceGroupArr = [];
+            //Collect Dg names and push into array
+            while (deviceGroupGr.next()) {
+                deviceGroupArr.push(deviceGroupGr.getValue('name'));
+            }
+
+            //Iterate over dg array and submit requests based on existing device groups
+            deviceGroupArr.forEach(function(dgName) {
+                var result = adapter.fetchObject(schema.httpMethod, {
+                    "device-group": dgName,
+                    "location": "device-group"
+                });
+
+                if (!result.success) {
+                    this.createIncident(this.assignmentGroupSysId, result.error);
+                    return;
+                }
+
+                payloads.push(payload);
+            }, this);
+        } else {
+            var result = adapter.fetchObject(schema.httpMethod);
+            if (!result.success) {
+                this.createIncident(this.assignmentGroupSysId, result.error);
+				return;
+            }
+			payloads.push(result.payload);
+        }
+
+
+        //Parse all payloads
+        var allRecords = [];
+        payloads.forEach(function(payload) {
+            var parsed = this._parsePayload(payload, schema.map); //returns {records : [...]}
+            if (parsed && parsed.records && parsed.records.length > 0) {
+                allRecords = allRecords.concat(parsed.records);
+            }
+        }, this);
+
+
+        gs.info("Finished parsing, here's the allRecords array: " + JSON.stringify(allRecords));
+
+
+        // Dedupe (safe default, schema can override with dedupe:false)
+        if (schema.dedupe !== false) {
+            var key = schema.key || "u_name"; // fallback to u_name
+            allRecords = this._dedupeByKey(allRecords, key);
+            gs.info("After dedupe (" + key + "): " + JSON.stringify(allRecords.length));
+        }
+
+
+        // this._sendToImportSet(allRecords, schema.table);
+    },
+    /**
+     * Deduplicates an array of records by a given key.
+     *
+     * @param {Array<Object>} records  Array of record objects.
+     * @param {String} key             Property name to check for uniqueness.
+     * @returns {Array<Object>}        New array with only the first occurrence of each key value kept.
+     */
+    _dedupeByKey: function(records, key) {
+        var seen = {};
+        return records.filter(function(rec) {
+            var val = rec[key];
+            if (!val) return true; // keep if key not defined
+            if (seen[val]) return false; // drop dup
+            seen[val] = true;
+            return true;
+        });
+    },
+
+    /**
+     * The below function uses the schema map to determine which keys and values we extract from the JSON received from the REST request. To add additional values, add them to the schema "map" property at the beginning of this script include as well as the corresponding table columns to the relevant staging table, import table and transform map.
+     *
+     * Examine your endpoints JSON response as additional handling may be required if the structure of the data is not flat. For example, the normalizeValue function serves to stringify multiple values nested inside the 'default.port.member' and 'list.member' from Panorama application profiles and url categories, respectively.
+     *  **/
+    _parsePayload: function(payload, map) {
+        if (!payload) {
+            gs.info("Panorama Scheduled Job: " + this.correlationId + " Empty payload passed to _parsePayload function");
+            return {
+                records: []
+            };
+        }
+
+
+        gs.info("Panorama Scheduled Job: " + this.correlationId + " Received payload, sample: " + JSON.stringify(payload));
+
+
+        // Try accessing levels one by one
+        gs.info("Panorama Scheduled Job: " + this.correlationId + " typeof payload: " + typeof payload);
+        gs.info("Panorama Scheduled Job: " + this.correlationId + " Keys on payload: " + Object.keys(payload));
+
+
+        if (payload.result) {
+            gs.info("Panorama Scheduled Job: " + this.correlationId + " Found result object");
+            if (payload.result.entry) {
+                gs.info("Panorama Scheduled Job: " + this.correlationId + " Found entry array, length: " + payload.result.entry.length);
+            } else {
+                gs.info("Panorama Scheduled Job: " + this.correlationId + " No 'entry' property on payload.result. Keys: " + Object.keys(payload.result));
+            }
+        } else {
+            gs.info("Panorama Scheduled Job: " + this.correlationId + " No 'result' property on payload. Keys: " + Object.keys(payload));
+        }
+
+
+        var raw = (payload.result && payload.result.entry) ? payload.result.entry : [];
+        gs.info("Panorama Scheduled Job: " + this.correlationId + " Final raw array length: " + raw.length);
+
+
+        var records = [];
+        for (var i = 0; i < raw.length; i++) {
+            var item = {};
+            for (var targetKey in map) {
+                if (!map.hasOwnProperty(targetKey)) continue;
+
+
+                var path = map[targetKey]; // e.g., "default.port.member"
+                var rawValue = this._resolvePath(raw[i], path);
+
+
+                item[targetKey] = this._normalizeValue(rawValue);
+            }
+            records.push(item);
+        }
+
+
+        gs.info("Panorama Scheduled Job: " + this.correlationId + " Parsed " + records.length + " records.");
+        return {
+            records: records
+        };
+    },
+
+
+    /**The Import Multiple endpoint of the Import Set API accepts JSON in the following format:
+     * {
+     * records [
+     * {"name" : "string", "values" : "1,2,3"},
+     * {"name" : "string", "values" : "1,2,3"},
+     * ]
+     * }
+     * runImportUtil returns an array of objects from the parsePayload function which in turn is then passed as allRecords into the sendToImportSet function, which wraps that array of objects with records appended, as this is the expected format for the Import set API when calling Import Multiple.
+     * **/
+    _sendToImportSet: function(records, table) {
+        try {
+            var instanceUrl = gs.getProperty("glide.servlet.uri");
+            var url = instanceUrl + "api/now/import/" + table + "/insertMultiple";
+
+
+            var rm = new sn_ws.RESTMessageV2();
+            rm.setHttpMethod("POST");
+            rm.setEndpoint(url);
+            rm.setRequestHeader("Content-Type", "application/json");
+
+
+            var user = 'panorama_int_admin';
+            var password = '0:Z>!y:52ty5FPtl]uph!$xDX1}o&_+9x;Qx[*i2';
+
+
+            rm.setBasicAuth(user, password);
+
+
+            var requestBody = {
+                records: records
+            };
+            rm.setRequestBody(JSON.stringify(requestBody));
+
+
+            var response = rm.execute();
+            var status = response.getStatusCode();
+
+
+            if (status != 200 && status != 201) {
+                var err = "Import Set API call failed for table: " + table + " Status: " + status + " | Body: " + response.getBody();
+                this.createIncident(this.assignmentGroupSysId, err);
+                return;
+            }
+            gs.info("Panorama Import Set Creation: " + this.correlationId + " was successful for table: " + table + " Please inspect Transform Histories for more information.");
+        } catch (ex) {
+            this.createIncident(this.assignmentGroupSysId, "Exception in _sendToImportSet " + ex.message);
+        }
+    },
+    /**
+    Panorama uses {member : []} when multiple values are present for a property so we must normalize these values into strings before we pass them into the Import Set Import Multiple endpoint for transformation and insertion.
+    **/
+    _normalizeValue: function(value) {
+        // XML style object with "member" key
+        if (value && typeof value === "object" && value.member) {
+            var arr = Array.isArray(value.member) ? value.member : [value.member];
+            return arr.join(","); // flatten to comma-separated string
+        }
+
+
+        // raw array
+        if (Array.isArray(value)) {
+            return value.join(","); // flatten
+        }
+
+
+        // passthrough primitive/null
+        return value || null;
+    },
+    /**Returns the last key's value in the JSON property chain.
+     * params:
+     * @obj: type:obj; accepts the nth item in an entry
+     * @path: type:str; path to the keys value 'default.port.member' defined in schema.
+     */
+    _resolvePath: function(obj, path) {
+        if (!obj || !path) return null;
+
+
+        var parts = path.split(".");
+        var current = obj;
+
+
+        for (var j = 0; j < parts.length; j++) {
+            if (current == null) return null;
+            current = current[parts[j]];
+        }
+        return current;
+    },
+
+
+    createIncident: function(assignmentGroupSysId, errorMessage) {
+        try {
+            var inc = new GlideRecord("incident");
+            inc.initialize();
+            inc.short_description = "Panorama Integration Error: " + this.correlationId;
+            inc.description = "Error in Panorama Integration -- Correlation ID: " + this.correlationId + "\n\n" + errorMessage + "\n\nCheck system logs for correlation ID: " + this.correlationId;
+            inc.setValue('assignment_group', this.assignmentGroupSysId);
+            inc.setValue('contact_type', 'Proactive');
+            inc.setValue('category', 'request');
+            inc.setValue('u_category', 'software');
+            inc.setValue('subcategory', 'functionality');
+            inc.setValue('caller_id', 'ec4f86b247e7a650ad48dc6b416d4394'); //Panorama Integration Admin
+            var incSysId = inc.insert();
+            inc.update();
+            gs.error("Panorama: " + this.correlationId + " Incident Created: " + incSysId + " | Error: " + errorMessage);
+            return incSysId;
+        } catch (ex) {
+            gs.error("Panorama: " + this.correlationId + " Failed to create Incident: " + ex.message);
+            return null;
+        }
+    },
+
+
+    type: 'panoramaIntegrationUtils'
+};]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2025-09-28 14:40:20</sys_created_on>
+        <sys_id>9f09350d83d472100caa54d6feaad3bf</sys_id>
+        <sys_mod_count>9</sys_mod_count>
+        <sys_name>panoramaIntegrationUtils</sys_name>
+        <sys_package display_value="Firewall Interface Management Spoke" source="x_835786_firewall">3be3b9cd831472100caa54d6feaad3d5</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_scope display_value="Firewall Interface Management Spoke">3be3b9cd831472100caa54d6feaad3d5</sys_scope>
+        <sys_update_name>sys_script_include_9f09350d83d472100caa54d6feaad3bf</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2025-10-01 19:40:35</sys_updated_on>
+    </sys_script_include>
+</record_update>
