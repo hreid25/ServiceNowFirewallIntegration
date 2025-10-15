@@ -60,9 +60,10 @@ PanoramaAdapter.prototype = {
 
     },
 
-	editObject() {},
-	pushObject() {},
-
+	editObject: function() {},
+	pushObject: function() {},
+	getCommitJob: function() {},
+	
     /**
      * The below function uses the schema map to determine which keys and values we extract from the JSON received from the REST request. To add additional values, add them to the schema "map" property at the beginning of this script include as well as the corresponding table columns to the relevant staging table, import table and transform map.
      *
@@ -76,7 +77,7 @@ PanoramaAdapter.prototype = {
             for (var targetKey in map) {
                 if (!map.hasOwnProperty(targetKey)) continue;
                 var path = map[targetKey]; // e.g., "default.port.member"
-                var rawValue = this._resolvePath(raw[i], path);
+                var rawValue = _resolvePath(raw[i], path);
                 item[targetKey] = this._normalizeValue(rawValue);
             }
             records.push(item);
@@ -85,6 +86,8 @@ PanoramaAdapter.prototype = {
             records: records
         };
     },
+
+	_normalizeValue: function(value){},
 
 	_resolvePath: function(obj, path) {
         if (!obj || !path) return null;
@@ -116,9 +119,6 @@ PanoramaAdapter.prototype = {
         }
     },
 
-	getCommitJob: function() {
-
-	},
 
 
 
@@ -128,13 +128,13 @@ PanoramaAdapter.prototype = {
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2025-09-28 14:58:23</sys_created_on>
         <sys_id>e62d7541831872100caa54d6feaad3fd</sys_id>
-        <sys_mod_count>16</sys_mod_count>
+        <sys_mod_count>18</sys_mod_count>
         <sys_name>PanoramaAdapter</sys_name>
         <sys_package display_value="Firewall Interface Management Spoke" source="x_835786_firewall">3be3b9cd831472100caa54d6feaad3d5</sys_package>
         <sys_policy>read</sys_policy>
         <sys_scope display_value="Firewall Interface Management Spoke">3be3b9cd831472100caa54d6feaad3d5</sys_scope>
         <sys_update_name>sys_script_include_e62d7541831872100caa54d6feaad3fd</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2025-10-15 13:58:58</sys_updated_on>
+        <sys_updated_on>2025-10-15 14:13:07</sys_updated_on>
     </sys_script_include>
 </record_update>
