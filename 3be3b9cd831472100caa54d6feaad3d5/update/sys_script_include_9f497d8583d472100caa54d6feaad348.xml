@@ -9,34 +9,71 @@
         <mobile_callable>false</mobile_callable>
         <name>FirewallIntegrationFacade</name>
         <sandbox_callable>false</sandbox_callable>
-        <script><![CDATA[var IFirewallAdapter = Class.create();
-IFirewallAdapter.prototype = {
-    initialize: function() {
-        this.adapter = new PanoramaAdapter();
+        <script><![CDATA[var FirewallIntegrationFacade = Class.create();
+FirewallIntegrationFacade.prototype = {
+    initialize: function(adapterType, params) {
+        this.adapter = this._createAdapter(adapterType, params);
+        this.schemaUtil = new SchemaUtil(); // Panorama schema parsing utility -- can refactor to be dynamic once new platform is added
+        this.importUtil = new FirewallImportUtil(); // shared import handler
     },
 
-    runImport: function(schemaKey) {
-        var result = this.adapter.importData(schemaKey);
-        if (!result.success) {
-            gs.error("Import failed for " + schemaKey + ": " + result.message);
+    /**
+     * Dynamically instantiate adapter based on adapterType
+     */
+    _createAdapter: function(adapterType, params) {
+        switch (adapterType) {
+            case "panorama":
+                return new PanoramaAdapter(params);
+            // case "prisma":
+            //     return new PrismaAdapter(params);
+            default:
+                throw "Unsupported adapter type: " + adapterType;
         }
-        return result;
     },
 
-    type: "IFirewallAdapter"
+    /**
+     * Orchestrates object retrieval from firewall
+     */
+    runImportUtil: function(schemaName, queryParams) {
+        var schema = SchemaRegistry.getSchema(schemaName);
+        if (!schema)
+            throw "Schema not found: " + schemaName;
+
+        // Step 1: Fetch raw payload
+        var fetchResult = this.adapter.fetchObjects(schema.httpMethod, queryParams, schema);
+        if (!fetchResult.success)
+            return { success: false, error: fetchResult.error };
+
+        // Step 2: Parse payload via SchemaUtil
+        var parsed = this.schemaUtil.parseResponse(fetchResult.payload, schema.map);
+
+        // Step 3: Deduplicate if schema requires it
+        if (schema.dedupe)
+            parsed.records = this.schemaUtil.dedupe(parsed.records, schema.key);
+
+        // Step 4: Send parsed records to import table
+        var importResult = this.importUtil.sendToImportSet(parsed.records, schema.table);
+
+        return {
+            success: importResult.success,
+            message: importResult.message || "Import complete"
+        };
+    },
+
+    type: "FirewallIntegrationFacade"
 };
 ]]></script>
         <sys_class_name>sys_script_include</sys_class_name>
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2025-09-28 14:51:44</sys_created_on>
         <sys_id>9f497d8583d472100caa54d6feaad348</sys_id>
-        <sys_mod_count>7</sys_mod_count>
+        <sys_mod_count>13</sys_mod_count>
         <sys_name>FirewallIntegrationFacade</sys_name>
         <sys_package display_value="Firewall Interface Management Spoke" source="x_835786_firewall">3be3b9cd831472100caa54d6feaad3d5</sys_package>
         <sys_policy>read</sys_policy>
         <sys_scope display_value="Firewall Interface Management Spoke">3be3b9cd831472100caa54d6feaad3d5</sys_scope>
         <sys_update_name>sys_script_include_9f497d8583d472100caa54d6feaad348</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2025-10-01 19:52:32</sys_updated_on>
+        <sys_updated_on>2025-10-16 17:53:15</sys_updated_on>
     </sys_script_include>
 </record_update>

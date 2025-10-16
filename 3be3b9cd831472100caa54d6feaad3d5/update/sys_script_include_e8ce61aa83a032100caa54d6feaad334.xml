@@ -5,13 +5,23 @@
         <api_name>x_835786_firewall.SchemaRegistry</api_name>
         <caller_access/>
         <client_callable>false</client_callable>
-        <description/>
+        <description>static list of schema that directs behaviour during run time</description>
         <mobile_callable>false</mobile_callable>
         <name>SchemaRegistry</name>
         <sandbox_callable>false</sandbox_callable>
         <script><![CDATA[var SchemaRegistry = Class.create();
 SchemaRegistry.prototype = {
     initialize: function() {
+
+        /** NEW schemas MUST include the following properties:
+         * @httpMethod type:str this is the name of your HTTP method defined in the REST Message record.
+         * @table type:str
+         * @requiresDeviceGroup type:boolean
+         * @key: type:str; unique identifier
+         * @dedupe: type:bool, optional; deduplicate entries - only necessary where multiple entries exist per device group.
+         * @map type:obj
+         *  */
+
         this._schemas = {};
 
         // register Panorama schemas
@@ -52,19 +62,18 @@ SchemaRegistry.prototype = {
     },
 
     type: 'SchemaRegistry'
-};
-]]></script>
+};]]></script>
         <sys_class_name>sys_script_include</sys_class_name>
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2025-10-15 16:14:09</sys_created_on>
         <sys_id>e8ce61aa83a032100caa54d6feaad334</sys_id>
-        <sys_mod_count>0</sys_mod_count>
+        <sys_mod_count>2</sys_mod_count>
         <sys_name>SchemaRegistry</sys_name>
         <sys_package display_value="Firewall Interface Management Spoke" source="x_835786_firewall">3be3b9cd831472100caa54d6feaad3d5</sys_package>
         <sys_policy>read</sys_policy>
         <sys_scope display_value="Firewall Interface Management Spoke">3be3b9cd831472100caa54d6feaad3d5</sys_scope>
         <sys_update_name>sys_script_include_e8ce61aa83a032100caa54d6feaad334</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2025-10-15 16:14:09</sys_updated_on>
+        <sys_updated_on>2025-10-16 16:33:15</sys_updated_on>
     </sys_script_include>
 </record_update>

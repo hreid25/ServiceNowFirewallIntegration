@@ -5,20 +5,34 @@
         <api_name>x_835786_firewall.IFirewallAdapter</api_name>
         <caller_access/>
         <client_callable>false</client_callable>
-        <description>interface for a given firewall adapter</description>
+        <description>Abstract base class. It defines the shared contract and basic setup logic that all firewall adapters (Panorama, Prisma, Fortigate, etc.) must follow.</description>
         <mobile_callable>false</mobile_callable>
         <name>IFirewallAdapter</name>
         <sandbox_callable>false</sandbox_callable>
         <script><![CDATA[var IFirewallAdapter = Class.create();
 IFirewallAdapter.prototype = {
-    fetch: function(schemaKey) {
-        throw "Not implemented";
+    fetchObjects: function(schemaKey) {
+        throw "fetchObjects() must be implemented by subclass.";
     },
-    parse: function(rawData, schemaKey) {
-        throw "Not implemented";
+	
+	pushObject: function(objectData) {
+        throw "pushObject() must be implemented by subclass.";
     },
-    importData: function(parsedData, schemaKey) {
-        throw "Not implemented";
+
+	editObject: function(objectData) {
+		throw "editObject() must be implemented by sublcass.";
+	},
+
+    deleteObject: function(objectId) {
+        throw "deleteObject() must be implemented by subclass.";
+    },
+
+    getCommitJob: function(jobId) {
+        throw "getCommitJob() must be implemented by subclass.";
+    },
+
+    commitToFirewall: function() {
+        throw "commitToFirewall() must be implemented by subclass.";
     },
 
     type: 'IFirewallAdapter'
@@ -27,13 +41,13 @@ IFirewallAdapter.prototype = {
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2025-09-28 14:56:55</sys_created_on>
         <sys_id>7dcc390d83d472100caa54d6feaad3b9</sys_id>
-        <sys_mod_count>1</sys_mod_count>
+        <sys_mod_count>6</sys_mod_count>
         <sys_name>IFirewallAdapter</sys_name>
         <sys_package display_value="Firewall Interface Management Spoke" source="x_835786_firewall">3be3b9cd831472100caa54d6feaad3d5</sys_package>
         <sys_policy>read</sys_policy>
         <sys_scope display_value="Firewall Interface Management Spoke">3be3b9cd831472100caa54d6feaad3d5</sys_scope>
         <sys_update_name>sys_script_include_7dcc390d83d472100caa54d6feaad3b9</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2025-09-28 15:04:59</sys_updated_on>
+        <sys_updated_on>2025-10-16 17:27:54</sys_updated_on>
     </sys_script_include>
 </record_update>

@@ -5,7 +5,7 @@
         <api_name>x_835786_firewall.SchemaUtil</api_name>
         <caller_access/>
         <client_callable>false</client_callable>
-        <description>SchemaUtil is a behavioral utility — it acts on SchemaRegistry schemas to transform payloads, normalize values, and provide logic.</description>
+        <description>SchemaUtil is a behavioral utility — it acts on SchemaRegistry schemas to transform payloads, normalize values, and provide logic for Panorama objects</description>
         <mobile_callable>false</mobile_callable>
         <name>SchemaUtil</name>
         <sandbox_callable>false</sandbox_callable>
@@ -20,12 +20,18 @@ SchemaUtil.prototype = {
      * @param {string} schemaKey - e.g. 'application_data'
      * @param {object} payload - raw JSON response from Panorama
      * @returns {object} { records: [...] }
+	 * 
+     * The below function uses the schema map to determine which keys and values we extract from the JSON received from the REST request. To add additional values, add them to the SchemaRegistry. To insert these values, ensure the table columns existing on corresponding staging and target tables in the Transform record.
+     *
+     *
      */
     parseResponse: function(schemaKey, payload) {
         var schema = this.registry.getSchema(schemaKey);
         if (!schema) {
             gs.error("[SchemaUtil] No schema found for key: " + schemaKey);
-            return { records: [] };
+            return {
+                records: []
+            };
         }
 
         var rawEntries = this._extractEntries(payload);
@@ -46,7 +52,9 @@ SchemaUtil.prototype = {
             results.push(record);
         }
 
-        return { records: results };
+        return {
+            records: results
+        };
     },
 
     /**
@@ -57,6 +65,17 @@ SchemaUtil.prototype = {
         if (payload.result && payload.result.entry)
             return Array.isArray(payload.result.entry) ? payload.result.entry : [payload.result.entry];
         return [];
+    },
+
+    _dedupeByKey: function(records, key) {
+        var seen = {};
+        return records.filter(function(rec) {
+            var val = rec[key];
+            if (!val) return true; // keep if key not defined
+            if (seen[val]) return false; // drop dup
+            seen[val] = true;
+            return true;
+        });
     },
 
     _resolvePath: function(obj, path) {
@@ -71,9 +90,12 @@ SchemaUtil.prototype = {
 
         return current;
     },
+    /**
+    Panorama uses {member : []} when multiple values are present for a property so we must normalize these values into strings before we pass them into the Import Set Import Multiple endpoint for insertion.
 
+	* Review the JSON response from the relevant endpoint as additional handling may be required if the structure of the data is not flat. For example, the normalizeValue function serves to stringify multiple values nested inside the 'default.port.member' and 'list.member' from Panorama application profiles and url categories, respectively.
+    **/
     _normalizeValue: function(value) {
-        // XML style object with "member" key
         if (value && typeof value === "object" && value.member) {
             var arr = Array.isArray(value.member) ? value.member : [value.member];
             return arr.join(",");
@@ -82,27 +104,19 @@ SchemaUtil.prototype = {
         return value || null;
     },
 
-    /**
-     * Optional helper — returns schema metadata (table name, dedupe, etc.)
-     */
-    getSchemaMeta: function(schemaKey) {
-        return this.registry.getSchema(schemaKey) || {};
-    },
-
     type: 'SchemaUtil'
-};
-]]></script>
+};]]></script>
         <sys_class_name>sys_script_include</sys_class_name>
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2025-10-15 17:58:55</sys_created_on>
         <sys_id>f938c6ea83e032100caa54d6feaad3fe</sys_id>
-        <sys_mod_count>0</sys_mod_count>
+        <sys_mod_count>9</sys_mod_count>
         <sys_name>SchemaUtil</sys_name>
         <sys_package display_value="Firewall Interface Management Spoke" source="x_835786_firewall">3be3b9cd831472100caa54d6feaad3d5</sys_package>
         <sys_policy>read</sys_policy>
         <sys_scope display_value="Firewall Interface Management Spoke">3be3b9cd831472100caa54d6feaad3d5</sys_scope>
         <sys_update_name>sys_script_include_f938c6ea83e032100caa54d6feaad3fe</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2025-10-15 17:58:55</sys_updated_on>
+        <sys_updated_on>2025-10-16 17:51:37</sys_updated_on>
     </sys_script_include>
 </record_update>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="DELETE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_835786_firewall.FirewallImportSetUtil</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description>used to send parsed records in { records:[] } format to the ImportSetMultiple API endpoint</description>
+        <mobile_callable>false</mobile_callable>
+        <name>FirewallImportSetUtil</name>
+        <sandbox_callable>false</sandbox_callable>
+        <script><![CDATA[var FirewallImportSetUtil = Class.create();
+FirewallImportSetUtil.prototype = {
+    initialize: function() {
+    },
+
+    type: 'FirewallImportSetUtil'
+};]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2025-10-15 14:26:15</sys_created_on>
+        <sys_id>2798912e832032100caa54d6feaad36c</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>FirewallImportSetUtil</sys_name>
+        <sys_package display_value="Firewall Interface Management Spoke" source="x_835786_firewall">3be3b9cd831472100caa54d6feaad3d5</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_scope display_value="Firewall Interface Management Spoke">3be3b9cd831472100caa54d6feaad3d5</sys_scope>
+        <sys_update_name>sys_script_include_2798912e832032100caa54d6feaad36c</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2025-10-15 14:26:15</sys_updated_on>
+    </sys_script_include>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Firewall Interface Management Spoke">3be3b9cd831472100caa54d6feaad3d5</application>
+        <file_path/>
+        <instance_id>a611cb613b1d62dc16e44a8aa4e45aa0</instance_id>
+        <instance_name>dev342658</instance_name>
+        <name>sys_script_include_2798912e832032100caa54d6feaad36c</name>
+        <payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sys_script_include"&gt;&lt;sys_script_include action="INSERT_OR_UPDATE"&gt;&lt;access&gt;package_private&lt;/access&gt;&lt;active&gt;true&lt;/active&gt;&lt;api_name&gt;x_835786_firewall.FirewallImportSetUtil&lt;/api_name&gt;&lt;caller_access/&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;description&gt;used to send parsed records in { records:[] } format to the ImportSetMultiple API endpoint&lt;/description&gt;&lt;mobile_callable&gt;false&lt;/mobile_callable&gt;&lt;name&gt;FirewallImportSetUtil&lt;/name&gt;&lt;sandbox_callable&gt;false&lt;/sandbox_callable&gt;&lt;script&gt;&lt;![CDATA[var FirewallImportSetUtil = Class.create();
+FirewallImportSetUtil.prototype = {
+    initialize: function() {
+    },
+
+    type: 'FirewallImportSetUtil'
+};]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script_include&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2025-10-15 14:26:15&lt;/sys_created_on&gt;&lt;sys_id&gt;2798912e832032100caa54d6feaad36c&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;FirewallImportSetUtil&lt;/sys_name&gt;&lt;sys_package display_value="Firewall Interface Management Spoke" source="x_835786_firewall"&gt;3be3b9cd831472100caa54d6feaad3d5&lt;/sys_package&gt;&lt;sys_policy&gt;read&lt;/sys_policy&gt;&lt;sys_scope display_value="Firewall Interface Management Spoke"&gt;3be3b9cd831472100caa54d6feaad3d5&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_include_2798912e832032100caa54d6feaad36c&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2025-10-15 14:26:15&lt;/sys_updated_on&gt;&lt;/sys_script_include&gt;&lt;/record_update&gt;</payload>
+        <payload_hash>1633686263</payload_hash>
+        <record_name>FirewallImportSetUtil</record_name>
+        <reverted_from/>
+        <source>7b48669183dcb2100caa54d6feaad332</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2025-10-15 14:26:16</sys_created_on>
+        <sys_id>450911ae832032100caa54d6feaad3bd</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>199e843b8220000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2025-10-15 14:26:16</sys_updated_on>
+        <type>Script Include</type>
+        <update_guid>490911ae4f2032108af5b39bdcac5bbc</update_guid>
+        <update_guid_history>490911ae4f2032108af5b39bdcac5bbc:1633686263</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete/>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2025-10-16 17:52:12</sys_created_on>
+        <sys_db_object display_value="" name="sys_script_include">sys_script_include</sys_db_object>
+        <sys_id>935479d686104b8397906aafe565a031</sys_id>
+        <sys_metadata>2798912e832032100caa54d6feaad36c</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>FirewallImportSetUtil</sys_name>
+        <sys_package display_value="Firewall Interface Management Spoke" source="x_835786_firewall">3be3b9cd831472100caa54d6feaad3d5</sys_package>
+        <sys_parent/>
+        <sys_policy>read</sys_policy>
+        <sys_scope display_value="Firewall Interface Management Spoke">3be3b9cd831472100caa54d6feaad3d5</sys_scope>
+        <sys_scope_delete display_value="">76e9742995e34a20a03786a0e4351324</sys_scope_delete>
+        <sys_update_name>sys_script_include_2798912e832032100caa54d6feaad36c</sys_update_name>
+        <sys_update_version display_value="sys_script_include_2798912e832032100caa54d6feaad36c">450911ae832032100caa54d6feaad3bd</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2025-10-16 17:52:12</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

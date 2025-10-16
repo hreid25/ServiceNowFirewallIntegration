@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_835786_firewall.FirewallImportUtil</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description/>
+        <mobile_callable>false</mobile_callable>
+        <name>FirewallImportUtil</name>
+        <sandbox_callable>false</sandbox_callable>
+        <script><![CDATA[var FirewallImportUtil = Class.create();
+FirewallImportUtil.prototype = {
+    initialize: function() {
+    },
+
+	/**The Import Multiple endpoint of the Import Set API accepts JSON in the following format:
+     * {
+     * records [
+     * {"name" : "string", "values" : "1,2,3"},
+     * {"name" : "string", "values" : "1,2,3"},
+     * ]
+     * }
+     * runImportUtil returns an array of objects from the parsePayload function which in turn is then passed as records into the sendToImportSet function, which wraps that array of objects with records appended, as this is the expected format for the Import set API when calling Import Multiple.
+     * **/
+
+	_sendToImportSet: function(records, table) {
+        try {
+            var instanceUrl = gs.getProperty("glide.servlet.uri");
+            var url = instanceUrl + "api/now/import/" + table + "/insertMultiple";
+
+            var rm = new sn_ws.RESTMessageV2();
+            rm.setHttpMethod("POST");
+            rm.setEndpoint(url);
+            rm.setRequestHeader("Content-Type", "application/json");
+
+            var user = 'panorama_int_admin';
+            var password = '0:Z>!y:52ty5FPtl]uph!$xDX1}o&_+9x;Qx[*i2';
+
+            rm.setBasicAuth(user, password);
+
+            var requestBody = {
+                records: records
+            };
+            rm.setRequestBody(JSON.stringify(requestBody));
+
+            var response = rm.execute();
+            var status = response.getStatusCode();
+
+            if (status != 200 && status != 201) {
+                var err = "Import Set API call failed for table: " + table + " Status: " + status + " | Body: " + response.getBody();
+                return {
+					success: false,
+					error: err
+				};
+            }
+            gs.info("Panorama Import Set Creation: was successful for table: " + table + " Please inspect Transform Histories for more information.");
+        } catch (ex) {
+            gs.info(ex.message);
+        }
+    },
+
+    type: 'FirewallImportUtil'
+};]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2025-10-16 15:24:20</sys_created_on>
+        <sys_id>463caeba83a872100caa54d6feaad329</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_name>FirewallImportUtil</sys_name>
+        <sys_package display_value="Firewall Interface Management Spoke" source="x_835786_firewall">3be3b9cd831472100caa54d6feaad3d5</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_scope display_value="Firewall Interface Management Spoke">3be3b9cd831472100caa54d6feaad3d5</sys_scope>
+        <sys_update_name>sys_script_include_463caeba83a872100caa54d6feaad329</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2025-10-16 17:53:31</sys_updated_on>
+    </sys_script_include>
+</record_update>
