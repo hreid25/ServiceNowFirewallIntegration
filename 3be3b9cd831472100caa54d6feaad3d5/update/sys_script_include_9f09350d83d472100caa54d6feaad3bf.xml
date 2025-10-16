@@ -21,35 +21,11 @@ panoramaIntegrationUtils.prototype = {
          * @dedupe: type:bool, optional; deduplicate entries - only necessary where multiple entries exist per device group.
          * @map type:obj
          *  */
-        this.schemas = {
-            application_data: {
-                httpMethod: "retrievePanoramaApplications",
-                table: "x_kpmg7_panorama_f_application_profile_import",
-                requiresDeviceGroup: false,
-                key: "u_name",
-                dedupe: false,
-                map: {
-                    u_name: "@name",
-                    u_port: "default.port.member",
-                    u_subcategory: "subcategory",
-                    category: "category"
-                },
-            },
-            url_categories: {
-                httpMethod: "retrieveUrlCategories",
-                table: "x_kpmg7_panorama_f_url_categories_import",
-                requiresDeviceGroup: true,
-                key: "u_name",
-                dedupe: true,
-                map: {
-                    u_name: "@name",
-                    u_type: "type",
-                    u_description: "description",
-                },
-            }
-        };
-        this.assignmentGroupSysId = "1d90ce486f9c358035c0a881be3ee4f4";
+        this.correlationId = correlationId || gs.generateGUID();
+        this.registry = new SchemaRegistry();
+        this.schemaUtil = new SchemaUtil();
         this.restMessageName = "panoramaObjectRetrieval";
+        this.assignmentGroupSysId = "1d90ce486f9c358035c0a881be3ee4f4";
     },
 
 
@@ -327,13 +303,13 @@ panoramaIntegrationUtils.prototype = {
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2025-09-28 14:40:20</sys_created_on>
         <sys_id>9f09350d83d472100caa54d6feaad3bf</sys_id>
-        <sys_mod_count>9</sys_mod_count>
+        <sys_mod_count>10</sys_mod_count>
         <sys_name>panoramaIntegrationUtils</sys_name>
         <sys_package display_value="Firewall Interface Management Spoke" source="x_835786_firewall">3be3b9cd831472100caa54d6feaad3d5</sys_package>
         <sys_policy>read</sys_policy>
         <sys_scope display_value="Firewall Interface Management Spoke">3be3b9cd831472100caa54d6feaad3d5</sys_scope>
         <sys_update_name>sys_script_include_9f09350d83d472100caa54d6feaad3bf</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2025-10-01 19:40:35</sys_updated_on>
+        <sys_updated_on>2025-10-15 16:17:19</sys_updated_on>
     </sys_script_include>
 </record_update>

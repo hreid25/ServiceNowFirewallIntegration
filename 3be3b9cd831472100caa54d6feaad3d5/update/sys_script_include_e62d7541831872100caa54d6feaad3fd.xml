@@ -22,7 +22,7 @@ PanoramaAdapter.prototype = {
      * @httpMethod (string) -- HTTP Method record name
      * @queryParams (object, optional) -- query params for endpoint defined in schema
      */
-    fetchObjects: function(httpMethod, queryParams) {
+    fetchObjects: function(httpMethod, queryParams, schema) {
         var r = new sn_ws.RESTMessageV2(this.restMessageName, httpMethod);
         //apply query params if provided
         if (queryParams && typeof queryParams === "object") {
@@ -53,16 +53,18 @@ PanoramaAdapter.prototype = {
 
         } catch (ex) {
             return {
-                success: true,
+                success: false,
                 error: "Exception in fetch: " + ex.message
             };
         }
 
     },
-
+	pushObjects: function() {},
 	editObject: function() {},
-	pushObject: function() {},
+	//Get status of Panorama config commit job, if successful, proceed with local firewall commit
 	getCommitJob: function() {},
+	//XML CLI request to commit the rule to the firewall after commit job is successful
+	commitToFirewall: function() {},
 	
     /**
      * The below function uses the schema map to determine which keys and values we extract from the JSON received from the REST request. To add additional values, add them to the schema "map" property at the beginning of this script include as well as the corresponding table columns to the relevant staging table, import table and transform map.
@@ -78,7 +80,7 @@ PanoramaAdapter.prototype = {
                 if (!map.hasOwnProperty(targetKey)) continue;
                 var path = map[targetKey]; // e.g., "default.port.member"
                 var rawValue = _resolvePath(raw[i], path);
-                item[targetKey] = this._normalizeValue(rawValue);
+                item[targetKey] = _normalizeValue(rawValue);
             }
             records.push(item);
         }
@@ -87,15 +89,25 @@ PanoramaAdapter.prototype = {
         };
     },
 
-	_normalizeValue: function(value){},
+	_normalizeValue: function(value) {
+        // XML style object with "member" key
+        if (value && typeof value === "object" && value.member) {
+            var arr = Array.isArray(value.member) ? value.member : [value.member];
+            return arr.join(","); // flatten to comma-separated string
+        }
+        // raw array
+        if (Array.isArray(value)) {
+            return value.join(","); // flatten
+        }
+        // passthrough primitive/null
+        return value || null;
+    },
 
 	_resolvePath: function(obj, path) {
         if (!obj || !path) return null;
 
-
         var parts = path.split(".");
         var current = obj;
-
 
         for (var j = 0; j < parts.length; j++) {
             if (current == null) return null;
@@ -128,13 +140,13 @@ PanoramaAdapter.prototype = {
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2025-09-28 14:58:23</sys_created_on>
         <sys_id>e62d7541831872100caa54d6feaad3fd</sys_id>
-        <sys_mod_count>18</sys_mod_count>
+        <sys_mod_count>25</sys_mod_count>
         <sys_name>PanoramaAdapter</sys_name>
         <sys_package display_value="Firewall Interface Management Spoke" source="x_835786_firewall">3be3b9cd831472100caa54d6feaad3d5</sys_package>
         <sys_policy>read</sys_policy>
         <sys_scope display_value="Firewall Interface Management Spoke">3be3b9cd831472100caa54d6feaad3d5</sys_scope>
         <sys_update_name>sys_script_include_e62d7541831872100caa54d6feaad3fd</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2025-10-15 14:13:07</sys_updated_on>
+        <sys_updated_on>2025-10-15 17:57:02</sys_updated_on>
     </sys_script_include>
 </record_update>

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_835786_firewall.SchemaUtil</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description>SchemaUtil is a behavioral utility — it acts on SchemaRegistry schemas to transform payloads, normalize values, and provide logic.</description>
+        <mobile_callable>false</mobile_callable>
+        <name>SchemaUtil</name>
+        <sandbox_callable>false</sandbox_callable>
+        <script><![CDATA[var SchemaUtil = Class.create();
+SchemaUtil.prototype = {
+    initialize: function() {
+        this.registry = new SchemaRegistry(); // centralized schema store
+    },
+
+    /**
+     * Retrieves the schema from the registry and maps the payload into normalized records.
+     * @param {string} schemaKey - e.g. 'application_data'
+     * @param {object} payload - raw JSON response from Panorama
+     * @returns {object} { records: [...] }
+     */
+    parseResponse: function(schemaKey, payload) {
+        var schema = this.registry.getSchema(schemaKey);
+        if (!schema) {
+            gs.error("[SchemaUtil] No schema found for key: " + schemaKey);
+            return { records: [] };
+        }
+
+        var rawEntries = this._extractEntries(payload);
+        var map = schema.map;
+        var results = [];
+
+        for (var i = 0; i < rawEntries.length; i++) {
+            var entry = rawEntries[i];
+            var record = {};
+
+            for (var targetKey in map) {
+                if (!map.hasOwnProperty(targetKey)) continue;
+                var path = map[targetKey];
+                var value = this._resolvePath(entry, path);
+                record[targetKey] = this._normalizeValue(value);
+            }
+
+            results.push(record);
+        }
+
+        return { records: results };
+    },
+
+    /**
+     * Pulls the relevant node in the Panorama response (e.g. result.entry[])
+     */
+    _extractEntries: function(payload) {
+        if (!payload) return [];
+        if (payload.result && payload.result.entry)
+            return Array.isArray(payload.result.entry) ? payload.result.entry : [payload.result.entry];
+        return [];
+    },
+
+    _resolvePath: function(obj, path) {
+        if (!obj || !path) return null;
+        var parts = path.split(".");
+        var current = obj;
+
+        for (var i = 0; i < parts.length; i++) {
+            if (current == null) return null;
+            current = current[parts[i]];
+        }
+
+        return current;
+    },
+
+    _normalizeValue: function(value) {
+        // XML style object with "member" key
+        if (value && typeof value === "object" && value.member) {
+            var arr = Array.isArray(value.member) ? value.member : [value.member];
+            return arr.join(",");
+        }
+        if (Array.isArray(value)) return value.join(",");
+        return value || null;
+    },
+
+    /**
+     * Optional helper — returns schema metadata (table name, dedupe, etc.)
+     */
+    getSchemaMeta: function(schemaKey) {
+        return this.registry.getSchema(schemaKey) || {};
+    },
+
+    type: 'SchemaUtil'
+};
+]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2025-10-15 17:58:55</sys_created_on>
+        <sys_id>f938c6ea83e032100caa54d6feaad3fe</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>SchemaUtil</sys_name>
+        <sys_package display_value="Firewall Interface Management Spoke" source="x_835786_firewall">3be3b9cd831472100caa54d6feaad3d5</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_scope display_value="Firewall Interface Management Spoke">3be3b9cd831472100caa54d6feaad3d5</sys_scope>
+        <sys_update_name>sys_script_include_f938c6ea83e032100caa54d6feaad3fe</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2025-10-15 17:58:55</sys_updated_on>
+    </sys_script_include>
+</record_update>
