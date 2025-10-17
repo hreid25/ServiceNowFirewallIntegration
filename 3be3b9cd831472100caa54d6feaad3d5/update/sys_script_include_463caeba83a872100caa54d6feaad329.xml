@@ -21,10 +21,9 @@ FirewallImportUtil.prototype = {
      * {"name" : "string", "values" : "1,2,3"},
      * ]
      * }
-     * runImportUtil returns an array of objects from the parsePayload function which in turn is then passed as records into the sendToImportSet function, which wraps that array of objects with records appended, as this is the expected format for the Import set API when calling Import Multiple.
      * **/
 
-	_sendToImportSet: function(records, table) {
+	sendToImportSet: function(records, table) {
         try {
             var instanceUrl = gs.getProperty("glide.servlet.uri");
             var url = instanceUrl + "api/now/import/" + table + "/insertMultiple";
@@ -35,7 +34,7 @@ FirewallImportUtil.prototype = {
             rm.setRequestHeader("Content-Type", "application/json");
 
             var user = 'panorama_int_admin';
-            var password = '0:Z>!y:52ty5FPtl]uph!$xDX1}o&_+9x;Qx[*i2';
+            var password = 'xw&]7G:=B0_QbphpfTZ_;+1}M*s]Snf;ra99U&_lD*@vx,orbgjd4_nHQv[DULT?vA-0,S^h3=0$Z+z&*G]{-{$ek9p=AAJm9F+A';
 
             rm.setBasicAuth(user, password);
 
@@ -49,6 +48,7 @@ FirewallImportUtil.prototype = {
 
             if (status != 200 && status != 201) {
                 var err = "Import Set API call failed for table: " + table + " Status: " + status + " | Body: " + response.getBody();
+				gs.info(err);
                 return {
 					success: false,
 					error: err
@@ -66,13 +66,13 @@ FirewallImportUtil.prototype = {
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2025-10-16 15:24:20</sys_created_on>
         <sys_id>463caeba83a872100caa54d6feaad329</sys_id>
-        <sys_mod_count>2</sys_mod_count>
+        <sys_mod_count>6</sys_mod_count>
         <sys_name>FirewallImportUtil</sys_name>
         <sys_package display_value="Firewall Interface Management Spoke" source="x_835786_firewall">3be3b9cd831472100caa54d6feaad3d5</sys_package>
         <sys_policy>read</sys_policy>
         <sys_scope display_value="Firewall Interface Management Spoke">3be3b9cd831472100caa54d6feaad3d5</sys_scope>
         <sys_update_name>sys_script_include_463caeba83a872100caa54d6feaad329</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2025-10-16 17:53:31</sys_updated_on>
+        <sys_updated_on>2025-10-17 17:46:28</sys_updated_on>
     </sys_script_include>
 </record_update>

@@ -32,10 +32,17 @@ FirewallIntegrationFacade.prototype = {
     },
 
     /**
-     * Orchestrates object retrieval from firewall
+     * Orchestrates object retrieval from firewall, ETLs the payload, then passes expected format to Import Set API. The Import Multiple endpoint of the Import Set API accepts JSON in the following format:
+     * {
+     * records [
+     * {"name" : "string", "values" : "1,2,3"},
+     * {"name" : "string", "values" : "1,2,3"},
+     * ]
+     * }
      */
     runImportUtil: function(schemaName, queryParams) {
-        var schema = SchemaRegistry.getSchema(schemaName);
+        var schema = new SchemaRegistry().getSchema(schemaName);
+		gs.info("Completed fetching schema:  " + JSON.stringify(schema));
         if (!schema)
             throw "Schema not found: " + schemaName;
 
@@ -43,9 +50,12 @@ FirewallIntegrationFacade.prototype = {
         var fetchResult = this.adapter.fetchObjects(schema.httpMethod, queryParams, schema);
         if (!fetchResult.success)
             return { success: false, error: fetchResult.error };
+		
+		gs.info("fetch result completed successfully: " + JSON.stringify(fetchResult.payload));
 
         // Step 2: Parse payload via SchemaUtil
         var parsed = this.schemaUtil.parseResponse(fetchResult.payload, schema.map);
+		gs.info("parsing complete: " + JSON.stringify(parsed.records));
 
         // Step 3: Deduplicate if schema requires it
         if (schema.dedupe)
@@ -54,10 +64,10 @@ FirewallIntegrationFacade.prototype = {
         // Step 4: Send parsed records to import table
         var importResult = this.importUtil.sendToImportSet(parsed.records, schema.table);
 
-        return {
-            success: importResult.success,
-            message: importResult.message || "Import complete"
-        };
+        // return {
+        //     success: importResult.success,
+        //     message: importResult.message || "Import complete"
+        // };
     },
 
     type: "FirewallIntegrationFacade"
@@ -67,13 +77,13 @@ FirewallIntegrationFacade.prototype = {
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2025-09-28 14:51:44</sys_created_on>
         <sys_id>9f497d8583d472100caa54d6feaad348</sys_id>
-        <sys_mod_count>13</sys_mod_count>
+        <sys_mod_count>21</sys_mod_count>
         <sys_name>FirewallIntegrationFacade</sys_name>
         <sys_package display_value="Firewall Interface Management Spoke" source="x_835786_firewall">3be3b9cd831472100caa54d6feaad3d5</sys_package>
         <sys_policy>read</sys_policy>
         <sys_scope display_value="Firewall Interface Management Spoke">3be3b9cd831472100caa54d6feaad3d5</sys_scope>
         <sys_update_name>sys_script_include_9f497d8583d472100caa54d6feaad348</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2025-10-16 17:53:15</sys_updated_on>
+        <sys_updated_on>2025-10-17 17:49:56</sys_updated_on>
     </sys_script_include>
 </record_update>
