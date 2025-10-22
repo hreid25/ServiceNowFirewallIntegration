@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_app_module">
+    <sys_app_module action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <application display_value="Self-Service">08771d0cc0a8016401f604303b94b999</application>
+        <assessment/>
+        <device_type/>
+        <filter/>
+        <hint/>
+        <homepage/>
+        <image/>
+        <link_type>LIST</link_type>
+        <map_page/>
+        <mobile_title>Panorama Application Profiles</mobile_title>
+        <mobile_view_name>Mobile</mobile_view_name>
+        <name>x_835786_firewall_panorama_application_profiles</name>
+        <order/>
+        <override_menu_roles>false</override_menu_roles>
+        <query/>
+        <report/>
+        <require_confirmation>true</require_confirmation>
+        <roles>x_835786_firewall.panorama_application_profiles_user</roles>
+        <sys_class_name>sys_app_module</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2025-10-17 14:37:44</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>a0de23038324f2100caa54d6feaad315</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Panorama Application Profiles</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="Firewall Interface Management Spoke" source="x_835786_firewall">3be3b9cd831472100caa54d6feaad3d5</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Firewall Interface Management Spoke">3be3b9cd831472100caa54d6feaad3d5</sys_scope>
+        <sys_update_name>sys_app_module_a0de23038324f2100caa54d6feaad315</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2025-10-17 14:37:44</sys_updated_on>
+        <timeline_page/>
+        <title>Panorama Application Profiles</title>
+        <uncancelable>false</uncancelable>
+        <view_name/>
+        <window_name/>
+    </sys_app_module>
+</record_update>

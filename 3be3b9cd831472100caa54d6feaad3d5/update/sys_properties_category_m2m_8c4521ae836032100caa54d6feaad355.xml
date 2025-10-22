@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties_category_m2m">
+    <sys_properties_category_m2m action="INSERT_OR_UPDATE">
+        <category display_value="Panorama Properties">990521ae836032100caa54d6feaad30a</category>
+        <order>100</order>
+        <property display_value="x_835786_firewall.panoramaEnabled" name="x_835786_firewall.panoramaEnabled">e39425aa836032100caa54d6feaad3de</property>
+        <sys_class_name>sys_properties_category_m2m</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2025-10-15 15:19:43</sys_created_on>
+        <sys_id>8c4521ae836032100caa54d6feaad355</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>x_835786_firewall.panoramaEnabled.Panorama Properties</sys_name>
+        <sys_package display_value="Firewall Interface Management Spoke" source="x_835786_firewall">3be3b9cd831472100caa54d6feaad3d5</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Firewall Interface Management Spoke">3be3b9cd831472100caa54d6feaad3d5</sys_scope>
+        <sys_update_name>sys_properties_category_m2m_8c4521ae836032100caa54d6feaad355</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2025-10-15 15:19:43</sys_updated_on>
+    </sys_properties_category_m2m>
+</record_update>

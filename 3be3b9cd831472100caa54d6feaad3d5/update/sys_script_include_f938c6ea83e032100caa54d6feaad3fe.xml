@@ -13,6 +13,7 @@
 SchemaUtil.prototype = {
     initialize: function() {
         this.registry = new SchemaRegistry(); // centralized schema store
+		this.logger = new PanoramaLogger("x_835786_firewall.PanoramaAdapter.debug", "SchemaUtil");
     },
 
     /**
@@ -26,8 +27,9 @@ SchemaUtil.prototype = {
      *
      */
     parseResponse: function(payload, schemaMap) {
-		// gs.info("this is my schema map: " + JSON.stringify(schemaMap));
+		this.logger.debug("Starting parseResponse with schema: " + JSON.stringify(Object.keys(schemaMap)));
         var rawEntries = this._extractEntries(payload);
+		this.logger.debug("Extracted " + rawEntries.length + " entries from payload.");
         var map = schemaMap;
         var results = [];
 
@@ -43,6 +45,7 @@ SchemaUtil.prototype = {
             }
 
             results.push(record);
+			this.logger.debug("parseResponse completed. Total records built: " + results.length);
         }
 
         return {
@@ -54,10 +57,18 @@ SchemaUtil.prototype = {
      * Pulls the relevant node in the Panorama response (e.g. result.entry[])
      */
     _extractEntries: function(payload) {
-        if (!payload) return [];
-        if (payload.result && payload.result.entry)
-            return Array.isArray(payload.result.entry) ? payload.result.entry : [payload.result.entry];
-        return [];
+        if (!payload) {
+			this.logger.debug("_extractEntries: payload was empty.");
+			return [];
+		} 
+		
+        if (payload.result && payload.result.entry) {
+            var entries = Array.isArray(payload.result.entry) ? payload.result.entry : [payload.result.entry];
+			this.logger.debug("_extractEntries: found " + entries.length + " entries.");
+			return entries;
+		}
+		this.logger.debug("_extractEntries: no result.entry found in payload.");
+		return [];
     },
 
     _dedupeByKey: function(records, key) {
@@ -77,7 +88,10 @@ SchemaUtil.prototype = {
         var current = obj;
 
         for (var i = 0; i < parts.length; i++) {
-            if (current == null) return null;
+            if (current == null) {
+				this.logger.debug("_resolvePath: null encountered at part '" + parts[i] + "' for path '" + path + "'");
+				return null;
+			}
             current = current[parts[i]];
         }
 
@@ -86,9 +100,10 @@ SchemaUtil.prototype = {
     /**
     Panorama uses {member : []} when multiple values are present for a property so we must normalize these values into strings before we pass them into the records object for the Import Set API.
 
-	*normalizeValue function serves to stringify multiple values inside nested JSON. Specifically, we check the 'member' property ofthe 'default.port.member' and 'list.member' from Panorama application profiles and url categories, respectively.
+	*normalizeValue function serves to stringify multiple values inside nested JSON. Specifically, we retrieve the 'member' property, like the 'default.port.member' and 'list.member' from Panorama application profiles and url categories, respectively.
     **/
     _normalizeValue: function(value) {
+		this.logger.debug("_normalizeValue: input=" + JSON.stringify(value));
         if (value && typeof value === "object" && value.member) {
             var arr = Array.isArray(value.member) ? value.member : [value.member];
             return arr.join(",");
@@ -103,13 +118,13 @@ SchemaUtil.prototype = {
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2025-10-15 17:58:55</sys_created_on>
         <sys_id>f938c6ea83e032100caa54d6feaad3fe</sys_id>
-        <sys_mod_count>19</sys_mod_count>
+        <sys_mod_count>25</sys_mod_count>
         <sys_name>SchemaUtil</sys_name>
         <sys_package display_value="Firewall Interface Management Spoke" source="x_835786_firewall">3be3b9cd831472100caa54d6feaad3d5</sys_package>
         <sys_policy>read</sys_policy>
         <sys_scope display_value="Firewall Interface Management Spoke">3be3b9cd831472100caa54d6feaad3d5</sys_scope>
         <sys_update_name>sys_script_include_f938c6ea83e032100caa54d6feaad3fe</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2025-10-17 17:49:54</sys_updated_on>
+        <sys_updated_on>2025-10-22 13:47:19</sys_updated_on>
     </sys_script_include>
 </record_update>

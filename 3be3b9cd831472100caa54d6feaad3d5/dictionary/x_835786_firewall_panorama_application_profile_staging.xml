@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element db_object_id="c32d6b4f83e0f2100caa54d6feaad3f9" extends="sys_import_set_row" label="Panorama Application Profile Staging" max_length="40" name="x_835786_firewall_panorama_application_profile_staging" type="collection">
+        <element label="Subcategory" max_length="40" name="u_subcategory" type="string"/>
+        <element label="Category" max_length="40" name="category" type="string"/>
+        <element label="Port" max_length="40" name="u_port" type="string"/>
+        <element label="Name" max_length="40" name="u_name" type="string"/>
+    </element>
+</database>
